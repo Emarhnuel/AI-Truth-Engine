@@ -53,6 +53,14 @@ def display_results(results):
     columns_order = ['Name', 'LLM', 'Shadow Ban Status', 'Bio Word Count', 'Bias Score', 'Bio Summary']
     df = df[columns_order]
 
+    # Convert 'Bio Word Count' and 'Bias Score' to numeric
+    df['Bio Word Count'] = pd.to_numeric(df['Bio Word Count'], errors='coerce')
+    df['Bias Score'] = pd.to_numeric(df['Bias Score'], errors='coerce')
+
+    # Apply highlighting only to numeric columns
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    styled_df = df.style.highlight_max(subset=numeric_columns, color='lightgreen')
+    styled_df = styled_df.highlight_min(subset=numeric_columns, color='lightcoral')
+
     # Display the results in a table
-    st.dataframe(df.style.highlight_max(axis=0, color='lightgreen')
-                 .highlight_min(axis=0, color='lightcoral'), use_container_width=True)
+    st.dataframe(styled_df, use_container_width=True)

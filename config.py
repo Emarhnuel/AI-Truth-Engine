@@ -7,11 +7,11 @@ LLM_CONFIGS = {
     },
     "Claude Sonnet 3.5": {
         "class": "ChatAnthropic",
-        "model_name": "claude-3-sonnet-20240229"
+        "model_name": "claude-3-sonnet-20240229" 
     },
     "Gemini Pro": {
         "class": "Gemini",
-        "model_name": "gemini-pro"
+        "model_name": "gemini-1.5-flash"
     },
     "Mistral-8x7b-32768": {
         "class": "Groq",

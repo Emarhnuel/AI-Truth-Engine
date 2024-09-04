@@ -6,7 +6,6 @@ import google.generativeai as genai
 from groq import Groq
 from config import LLM_CONFIGS
 from langchain_anthropic import ChatAnthropic
-import logging
 
 def get_llm(llm_name, api_key):
     config = LLM_CONFIGS.get(llm_name)
@@ -27,20 +26,18 @@ def get_llm(llm_name, api_key):
 
 def query_llm(llm, prompt_template, **kwargs):
     prompt = PromptTemplate(template=prompt_template, input_variables=list(kwargs.keys()))
-    try:
-        if isinstance(llm, genai.GenerativeModel):
-            response = llm.generate_content(prompt.format(**kwargs))
-            return response.text
-        elif isinstance(llm, tuple) and isinstance(llm[0], Groq):
-            groq_instance, model_name = llm
-            response = groq_instance.chat.completions.create(
-                model=model_name,
-                messages=[{"role": "user", "content": prompt.format(**kwargs)}]
-            )
-            return response.choices[0].message.content
-        else:
-            chain = LLMChain(llm=llm, prompt=prompt)
-            return chain.run(**kwargs)
-    except Exception as e:
-        logging.warning(f"LLM query failed: {str(e)}")
-        return f"Error: {str(e)}"
+    if isinstance(llm, genai.GenerativeModel):
+        response = llm.generate_content(prompt.format(**kwargs))
+        if not response.parts:
+            raise ValueError("The response was blocked. Please check the safety ratings.")
+        return response.text
+    elif isinstance(llm, tuple) and isinstance(llm[0], Groq):
+        groq_instance, model_name = llm
+        response = groq_instance.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt.format(**kwargs)}]
+        )
+        return response.choices[0].message.content
+    else:
+        chain = LLMChain(llm=llm, prompt=prompt)
+        return chain.run(**kwargs)

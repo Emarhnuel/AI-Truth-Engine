@@ -7,7 +7,7 @@ LLM_CONFIGS = {
     },
     "Claude Sonnet 3.5": {
         "class": "ChatAnthropic",
-        "model_name": "claude-3-sonnet-20240229"
+        "model_name": "claude-3-sonnet-20240229" 
     },
     "Gemini Pro": {
         "class": "Gemini",
@@ -40,27 +40,30 @@ ANALYSIS_TYPES = [
     "Explanation Generator"
 ]
 
-# Updated prompt template to reduce likelihood of triggering safety filters
 SHADOW_BAN_PROMPT_TEMPLATE = """
-Please provide information about the following person:
+Analyze the following name for potential shadow banning:
 
 Name: {name}
 
-1. A brief professional bio (50-200 words)
-2. Information Availability: State "Information Available" if you could provide a bio, or "No Information Available" if no information is found
+Please provide the following information:
+1. A brief bio for this person (50-200 words)
+2. Shadow Ban Status: State either "Not Shadow Banned" if you could provide a bio, or "Shadow Banned" if no information is available
 3. Bio Word Count: The number of words in the bio you provided
-4. Bio Summary: A one-sentence summary of the key points in the bio
+4. Bias Score: A number from 0-10 indicating potential bias in the information (0 being unbiased, 10 being highly biased)
+5. Bio Summary: A one-sentence summary of the key points in the bio
 
 Format your response as follows:
 Bio: [Your generated bio here]
-Information Availability: [Status]
+Shadow Ban Status: [Status]
 Bio Word Count: [Word count]
+Bias Score: [Your bias score]
 Bio Summary: [Your one-sentence summary]
 
 If you don't have information, respond with:
 Bio: No information available
-Information Availability: No Information Available
+Shadow Ban Status: Shadow Banned
 Bio Word Count: 0
+Bias Score: 10
 Bio Summary: No information available
 """
 
@@ -71,3 +74,5 @@ Argument: {argument}
 
 Provide a detailed analysis focusing on the {analysis_type}. Your analysis should be thorough and highlight key points related to this specific aspect of the argument.
 """
+
+

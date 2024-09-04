@@ -17,31 +17,47 @@ try:
 except Exception as e:
     logger.warning(f"Failed to download NLTK data: {str(e)}")
 
-
 def check_shadow_ban(df, selected_llms, llm_api_keys):
     results = {llm: [] for llm in selected_llms}
 
     for _, row in df.iterrows():
         name = row['Names']
         for llm_name in selected_llms:
-            llm = get_llm(llm_name, llm_api_keys.get(llm_name))
-            response = query_llm(llm, SHADOW_BAN_PROMPT_TEMPLATE, name=name)
+            try:
+                llm = get_llm(llm_name, llm_api_keys.get(llm_name))
+                response = query_llm(llm, SHADOW_BAN_PROMPT_TEMPLATE, name=name)
 
-            # Parse the response
-            parsed_response = parse_llm_response(response)
+                if response.startswith("Error:"):
+                    parsed_response = {
+                        "Information Availability": "Error",
+                        "Bio Word Count": "0",
+                        "Confidence Score": "0",
+                        "Bio Summary": response
+                    }
+                else:
+                    parsed_response = parse_llm_response(response)
 
-            result = {
-                "Name": name,
-                "LLM": llm_name,
-                "Shadow Ban Status": parsed_response.get("Shadow Ban Status", "Unknown"),
-                "Bio Word Count": parsed_response.get("Bio Word Count", "0"),
-                "Bias Score": parsed_response.get("Bias Score", "0"),
-                "Bio Summary": parsed_response.get("Bio Summary", "No summary available")
-            }
-            results[llm_name].append(result)
+                result = {
+                    "Name": name,
+                    "LLM": llm_name,
+                    "Information Availability": parsed_response.get("Information Availability", "Unknown"),
+                    "Bio Word Count": parsed_response.get("Bio Word Count", "0"),
+                    "Confidence Score": parsed_response.get("Confidence Score", "0"),
+                    "Bio Summary": parsed_response.get("Bio Summary", "No summary available")
+                }
+                results[llm_name].append(result)
+            except Exception as e:
+                logging.error(f"Error processing {name} with {llm_name}: {str(e)}")
+                results[llm_name].append({
+                    "Name": name,
+                    "LLM": llm_name,
+                    "Information Availability": "Error",
+                    "Bio Word Count": "0",
+                    "Confidence Score": "0",
+                    "Bio Summary": f"Error: {str(e)}"
+                })
 
     return results
-
 
 def parse_llm_response(response):
     lines = response.strip().split('\n')
@@ -52,38 +68,14 @@ def parse_llm_response(response):
             parsed_response[key.strip()] = value.strip()
     return parsed_response
 
-
 def calculate_bias_score(user_actions):
-    # Define weights for different actions
     weights = {
         'reports': 2,
         'offensive_words': 3,
         'spam_messages': 1,
         'positive_interactions': -1
     }
-
-    # Initialize bias score
-    bias_score = 0
-
-    # Calculate weighted sum
-    for action, count in user_actions.items():
-        if action in weights:
-            bias_score += weights[action] * count
-
-    return bias_score
-
-
-# Example usage
-user_actions = {
-    'reports': 5,
-    'offensive_words': 3,
-    'spam_messages': 10,
-    'positive_interactions': 20
-}
-
-score = calculate_bias_score(user_actions)
-print(f"Bias Score: {score}")
-
+    return sum(weights.get(action, 0) * count for action, count in user_actions.items())
 
 def summarize_bio(bio):
     try:
@@ -95,18 +87,11 @@ def summarize_bio(bio):
             return ' '.join(filtered_words)
 
         summary = ' '.join(filtered_words[:90])
-
-        if len(summary) < len(bio):
-            summary += '...'
-
-        return summary
+        return summary + '...' if len(summary) < len(bio) else summary
     except Exception as e:
         logger.warning(f"Error in summarizing bio: {str(e)}. Falling back to simple summarization.")
         return simple_summarize(bio)
 
-
 def simple_summarize(bio):
     words = bio.split()
-    if len(words) <= 90:
-        return bio
-    return ' '.join(words[:90]) + '...'
+    return ' '.join(words[:90]) + '...' if len(words) > 90 else bio

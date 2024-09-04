@@ -5,6 +5,7 @@ pandas
 transformers
 torch
 google-generativeai
+langchain-anthropic
 groq
 openai
 anthropic

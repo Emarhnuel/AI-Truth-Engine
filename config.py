@@ -11,7 +11,7 @@ LLM_CONFIGS = {
     },
     "Gemini Pro": {
         "class": "Gemini",
-        "model_name": "gemini-1.5-flash"
+        "model_name": "gemini-pro"
     },
     "Mistral-8x7b-32768": {
         "class": "Groq",

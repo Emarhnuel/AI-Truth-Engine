@@ -1,9 +1,9 @@
 import streamlit as st
 from argument_analysis.analyzer import analyze_argument
 from utils import handle_errors
-from config import ANALYSIS_TYPES, LLM_CONFIGS
+from config import ANALYSIS_TYPES, LLM_CONFIGS, LLM_API_KEYS
 
-def argument_analysis_page(selected_llms, llm_api_keys):
+def argument_analysis_page(selected_llms):
     st.title("ARGUMENT ANALYSIS")
 
     analysis_types = st.multiselect(

@@ -4,7 +4,7 @@ from ui_components import create_sidebar, create_task_selector
 from shadow_ban.page import shadow_ban_page
 from argument_analysis.page import argument_analysis_page
 
-# Define the favicon
+# Define the favicon (unchanged)
 favicon = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
     <rect width="100" height="100" rx="20" fill="#f0f0f0"/>
@@ -14,6 +14,7 @@ favicon = """
     <circle cx="70" cy="40" r="5" fill="white"/>
 </svg>
 """
+
 
 def main():
     st.set_page_config(
@@ -28,9 +29,11 @@ def main():
     selected_llms = create_sidebar()
 
     if st.session_state.page == 'home':
+        # Create two columns: one for the title and buttons, one for the file uploader
         col1, col2 = st.columns([1, 2])
 
         with col1:
+            # Use HTML to set the title color to red and align left
             st.markdown("<h1 style='color: #FF0000;'>AI Truth Engine</h1>", unsafe_allow_html=True)
 
             if st.button("Shadow Ban Check"):
@@ -54,6 +57,7 @@ def main():
         shadow_ban_page(selected_llms)
     elif st.session_state.page == 'argument_analysis':
         argument_analysis_page(selected_llms)
+
 
 if __name__ == "__main__":
     main()

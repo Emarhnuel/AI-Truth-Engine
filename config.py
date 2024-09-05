@@ -9,9 +9,9 @@ LLM_API_KEYS = {
     "GPT-4": os.getenv("GPT4_API_KEY"),
     "Claude Sonnet 3.5": os.getenv("CLAUDE_API_KEY"),
     "Gemini Pro": os.getenv("GEMINI_API_KEY"),
-     "Mistral-8x7b-32768": os.getenv("GROQ_API_KEY"),
-     "Gemma2-9b-it": os.getenv("GROQ_API_KEY"),
-     "llama-3.1-8b-instant": os.getenv("GROQ_API_KEY")
+    "Mistral-8x7b-32768": os.getenv("GROQ_API_KEY"),
+    "Gemma2-9b-it": os.getenv("GROQ_API_KEY"),
+    "llama-3.1-8b-instant": os.getenv("GROQ_API_KEY")
 }
 
 LLM_CONFIGS = {
@@ -27,18 +27,18 @@ LLM_CONFIGS = {
         "class": "Gemini",
         "model_name": "gemini-pro"
     },
-      "Mistral-8x7b-32768": {
-          "class": "Groq",
-          "model_name": "mixtral-8x7b-32768"
-      },
-      "Gemma2-9b-it": {
-          "class": "Groq",
-          "model_name": "gemma-7b-it"
-      },
-      "llama-3.1-8b-instant": {
-          "class": "Groq",
-          "model_name": "llama-3.1-8b-instant"
-      }
+    "Mistral-8x7b-32768": {
+        "class": "Groq",
+        "model_name": "mixtral-8x7b-32768"
+    },
+    "Gemma2-9b-it": {
+        "class": "Groq",
+        "model_name": "gemma-7b-it"
+    },
+    "llama-3.1-8b-instant": {
+        "class": "Groq",
+        "model_name": "llama-3.1-8b-instant"
+    }
 }
 
 SUPPORTED_FILE_TYPES = ["csv", "xlsx", "xls"]

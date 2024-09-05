@@ -1,4 +1,3 @@
-from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI, ChatAnthropic
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate

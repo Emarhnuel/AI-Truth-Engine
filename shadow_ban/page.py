@@ -4,8 +4,9 @@ from data.input_handler import read_file, validate_input
 from shadow_ban.detector import check_shadow_ban
 from data.output_generator import generate_excel
 from utils import handle_errors
+from config import LLM_API_KEYS
 
-def shadow_ban_page(selected_llms, llm_api_keys):
+def shadow_ban_page(selected_llms):
     st.title("Shadow Ban Check")
 
     if 'uploaded_file' in st.session_state:
@@ -20,7 +21,7 @@ def shadow_ban_page(selected_llms, llm_api_keys):
         if st.button("Run analysis"):
             with handle_errors():
                 with st.spinner("Running analysis..."):
-                    results = check_shadow_ban(validated_data, selected_llms, llm_api_keys)
+                    results = check_shadow_ban(validated_data, selected_llms, LLM_API_KEYS)
                 display_results(results)
 
                 output_file = generate_excel(results, "shadow_ban_results.xlsx")

@@ -1,4 +1,18 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 APP_TITLE = "AI Truth Engine"
+
+LLM_API_KEYS = {
+    "GPT-4": os.getenv("GPT4_API_KEY"),
+    "Claude Sonnet 3.5": os.getenv("CLAUDE_API_KEY"),
+    "Gemini Pro": os.getenv("GEMINI_API_KEY"),
+    "Mistral-8x7b-32768": os.getenv("GROQ_API_KEY"),
+    "Gemma2-9b-it": os.getenv("GROQ_API_KEY"),
+    "llama-3.1-8b-instant": os.getenv("GROQ_API_KEY")
+}
 
 LLM_CONFIGS = {
     "GPT-4": {
@@ -74,5 +88,4 @@ Argument: {argument}
 
 Provide a detailed analysis focusing on the {analysis_type}. Your analysis should be thorough and highlight key points related to this specific aspect of the argument.
 """
-
 

@@ -104,7 +104,6 @@ def summarize_bio(bio):
         logger.warning(f"Error in summarizing bio: {str(e)}. Falling back to simple summarization.")
         return simple_summarize(bio)
 
-
 def simple_summarize(bio):
     words = bio.split()
     if len(words) <= 90:

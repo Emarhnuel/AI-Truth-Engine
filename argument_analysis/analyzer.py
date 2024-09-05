@@ -1,5 +1,5 @@
 from llm_interface import get_llm, query_llm
-from config import ARGUMENT_ANALYSIS_PROMPT_TEMPLATE
+from config import ARGUMENT_ANALYSIS_PROMPT_TEMPLATE, LLM_API_KEYS
 
 def analyze_argument(argument, analysis_types, selected_llms, llm_api_keys):
     results = {}

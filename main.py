@@ -1,5 +1,5 @@
 import streamlit as st
-from config import APP_TITLE
+from config import APP_TITLE, LLM_API_KEYS
 from ui_components import create_sidebar, create_task_selector
 from shadow_ban.page import shadow_ban_page
 from argument_analysis.page import argument_analysis_page
@@ -26,7 +26,7 @@ def main():
     if 'page' not in st.session_state:
         st.session_state.page = 'home'
 
-    selected_llms, llm_api_keys = create_sidebar()
+    selected_llms = create_sidebar()
 
     if st.session_state.page == 'home':
         # Create two columns: one for the title and buttons, one for the file uploader
@@ -54,9 +54,9 @@ def main():
                 st.session_state.uploaded_file = uploaded_file
 
     elif st.session_state.page == 'shadow_ban':
-        shadow_ban_page(selected_llms, llm_api_keys)
+        shadow_ban_page(selected_llms)
     elif st.session_state.page == 'argument_analysis':
-        argument_analysis_page(selected_llms, llm_api_keys)
+        argument_analysis_page(selected_llms)
 
 
 if __name__ == "__main__":

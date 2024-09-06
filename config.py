@@ -6,7 +6,7 @@ load_dotenv()
 APP_TITLE = "AI Truth Engine"
 
 LLM_API_KEYS = {
-    "gpt-4o-2024-08-06": os.getenv("GPT4_API_KEY"),
+    "GPT-4o": os.getenv("GPT4_API_KEY"),
     "Claude Sonnet 3.5": os.getenv("CLAUDE_API_KEY"),
     "Gemini Pro": os.getenv("GEMINI_API_KEY"),
     "Mistral-8x7b-32768": os.getenv("GROQ_API_KEY"),

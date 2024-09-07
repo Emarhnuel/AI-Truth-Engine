@@ -1,4 +1,3 @@
-from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI, ChatAnthropic
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
@@ -15,7 +14,7 @@ def get_llm(llm_name, api_key):
     if config["class"] == "ChatAnthropic":
         return ChatAnthropic(model=config["model_name"], anthropic_api_key=api_key)
     elif config["class"] == "ChatOpenAI":
-        return ChatOpenAI(model=config["model_name"], api_key=api_key)
+        return ChatOpenAI(model=config["model_name"], openai_api_key=api_key)
     elif config["class"] == "Gemini":
         genai.configure(api_key=api_key)
         return genai.GenerativeModel(config["model_name"])

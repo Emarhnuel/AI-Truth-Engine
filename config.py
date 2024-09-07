@@ -6,7 +6,7 @@ load_dotenv()
 APP_TITLE = "AI Truth Engine"
 
 LLM_API_KEYS = {
-    "GPT-4o": os.getenv("OPENAI_API_KEY"),
+    "GPT-4": os.getenv("GPT4_API_KEY"),
     "Claude Sonnet 3.5": os.getenv("CLAUDE_API_KEY"),
     "Gemini Pro": os.getenv("GEMINI_API_KEY"),
     "Mistral-8x7b-32768": os.getenv("GROQ_API_KEY"),
@@ -17,7 +17,7 @@ LLM_API_KEYS = {
 LLM_CONFIGS = {
     "GPT-4": {
         "class": "ChatOpenAI",
-        "model_name": "gpt-4o"
+        "model_name": "gpt-4"
     },
     "Claude Sonnet 3.5": {
         "class": "ChatAnthropic",

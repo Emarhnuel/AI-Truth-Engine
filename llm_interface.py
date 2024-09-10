@@ -40,3 +40,24 @@ def query_llm(llm, prompt_template, **kwargs):
     else:
         chain = LLMChain(llm=llm, prompt=prompt)
         return chain.run(**kwargs)
+
+def query_llm_batch(llm, prompt_template, names):
+    prompts = [PromptTemplate(template=prompt_template, input_variables=["name"]).format(name=name) for name in names]
+    
+    if isinstance(llm, genai.GenerativeModel):
+        responses = [llm.generate_content(prompt) for prompt in prompts]
+        return [r.text for r in responses if r.parts]
+    elif isinstance(llm, tuple) and isinstance(llm[0], Groq):
+        groq_instance, model_name = llm
+        responses = []
+        for prompt in prompts:
+            response = groq_instance.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            responses.append(response.choices[0].message.content)
+        return responses
+    else:
+        chain = LLMChain(llm=llm, prompt=PromptTemplate(template=prompt_template, input_variables=["name"]))
+        results = chain.apply([{"name": name} for name in names])
+        return [result['text'] for result in results]

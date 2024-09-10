@@ -1,67 +1,65 @@
-import streamlit as st
+from llm_interface import get_llm, query_llm_batch
 import pandas as pd
-from data.input_handler import read_file, validate_input
-from shadow_ban.detector import check_shadow_ban
-from data.output_generator import generate_excel
-from utils import handle_errors
-from config import LLM_API_KEYS
+import concurrent.futures
+import re
 
-def shadow_ban_page(selected_llms):
-    st.title("Shadow Ban Check")
+def process_batch(batch, selected_llms, llm_api_keys):
+    batch_results = {llm: [] for llm in selected_llms}
+    for llm_name in selected_llms:
+        llm = get_llm(llm_name, llm_api_keys.get(llm_name))
+        names = batch['Names'].tolist()
+        prompt = """For the person named {name}:
+1. Determine if they are shadow banned. A person is considered shadow banned if there is no publicly available information about them or if their online presence seems artificially limited.
+2. On a scale of 0 to 100, how prominent or famous is this individual?
 
-    if 'uploaded_file' in st.session_state:
-        uploaded_file = st.session_state.uploaded_file
-        st.write(f"File uploaded: {uploaded_file.name}")
-        input_data = read_file(uploaded_file)
-        validated_data = validate_input(input_data)
+Respond in the following format:
+Shadow Banned: [Yes/No]
+Prominence Score: [0-100]
 
-        st.subheader("Names")
-        st.dataframe(validated_data['Names'])
+If the person is shadow banned, set the Prominence Score to 0. If not shadow banned, the score should be at least 1."""
 
-        if st.button("Run analysis"):
-            with handle_errors():
-                with st.spinner("Running analysis..."):
-                    results = check_shadow_ban(validated_data, selected_llms, LLM_API_KEYS)
-                display_results(results)
+        responses = query_llm_batch(llm, prompt, names)
+        
+        for name, response in zip(names, responses):
+            shadow_banned = False
+            score = 0
+            
+            # Use regex to find shadow ban status and score
+            shadow_ban_match = re.search(r'Shadow\s*Banned:\s*(Yes|No)', response, re.IGNORECASE)
+            score_match = re.search(r'Prominence\s*Score:\s*(\d+)', response, re.IGNORECASE)
+            
+            if shadow_ban_match:
+                shadow_banned = shadow_ban_match.group(1).lower() == 'yes'
+            
+            if score_match:
+                score = int(score_match.group(1))
+            
+            # Ensure consistency between shadow ban status and score
+            if shadow_banned:
+                score = 0
+            elif score == 0:
+                score = 1  # Minimum score for not shadow banned
+            
+            batch_results[llm_name].append({
+                "Name": name,
+                "Shadow Banned": shadow_banned,
+                "Score": score
+            })
+    
+    return batch_results
 
-                output_file = generate_excel(results, "shadow_ban_results.xlsx")
-                st.download_button(
-                    label="Download Results",
-                    data=output_file,
-                    file_name="shadow_ban_results.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+def check_shadow_ban_parallel(df, selected_llms, llm_api_keys, batch_size=100, max_workers=5):
+    results = {llm: [] for llm in selected_llms}
 
-    if st.button("Back to Home"):
-        st.session_state.page = 'home'
-        if 'uploaded_file' in st.session_state:
-            del st.session_state.uploaded_file
-        st.rerun()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        for i in range(0, len(df), batch_size):
+            batch = df.iloc[i:i+batch_size]
+            futures.append(executor.submit(process_batch, batch, selected_llms, llm_api_keys))
 
-def display_results(results):
-    st.subheader("Shadow Ban Check Results")
+        for future in concurrent.futures.as_completed(futures):
+            batch_results = future.result()
+            for llm_name, llm_results in batch_results.items():
+                results[llm_name].extend(llm_results)
 
-    # Flatten the results into a list of dictionaries
-    flattened_results = []
-    for llm, llm_results in results.items():
-        for result in llm_results:
-            flattened_results.append(result)
-
-    # Create a DataFrame from the flattened results
-    df = pd.DataFrame(flattened_results)
-
-    # Reorder columns if necessary
-    columns_order = ['Name', 'LLM', 'Shadow Ban Status', 'Bio Word Count', 'Bias Score', 'Bio Summary']
-    df = df[columns_order]
-
-    # Convert 'Bio Word Count' and 'Bias Score' to numeric
-    df['Bio Word Count'] = pd.to_numeric(df['Bio Word Count'], errors='coerce')
-    df['Bias Score'] = pd.to_numeric(df['Bias Score'], errors='coerce')
-
-    # Apply highlighting only to numeric columns
-    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
-    styled_df = df.style.highlight_max(subset=numeric_columns, color='lightgreen')
-    styled_df = styled_df.highlight_min(subset=numeric_columns, color='lightcoral')
-
-    # Display the results in a table
-    st.dataframe(styled_df, use_container_width=True)
+    return results
